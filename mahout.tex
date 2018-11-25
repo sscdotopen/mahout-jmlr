@@ -9,7 +9,7 @@
 % is archived at http://www.jmlr.org/format/natbib.pdf
 
 \usepackage{jmlr2e}
-
+\usepackage[utf8]{inputenc}
 \usepackage{listings}
 % Definitions of handy macros can go here
 
@@ -33,11 +33,11 @@
 
 % Heading arguments are {volume}{year}{pages}{date submitted}{date published}{paper id}{author-full-names}
 
-\jmlrheading{1}{2000}{1-48}{4/00}{10/00}{meila00a}{Someone et al.}
+\jmlrheading{1}{2018}{1-48}{4/00}{10/00}{meila00a}{Anil et al.: Apache Mahout}
 
 % Short headings should be running head and authors last names
 
-\ShortHeadings{Apache Mahout: Machine Learning on Distributed Dataflow Systems}{Meil\u{a} and Jordan}
+\ShortHeadings{Apache Mahout: Machine Learning on Distributed Dataflow Systems}{Anil et al.}
 \firstpageno{1}
 
 \begin{document}
@@ -45,88 +45,88 @@
 \title{Apache Mahout: Machine Learning on Distributed Dataflow Systems}
 
 \author{\name Robin Anil \email robinanil@apache.org\\
+  \addr Tock, Chicago, US\\
+  %
   \name Gokhan Capan \email gcapan@apache.org\\
+  \addr Persona.tech, Istanbul, Turkey\\
+  %
   \name Isabel Drost-Fromm \email isabel@apache.org\\
+  \addr Europace AG, Berlin, Germany\\
+  %
   \name Trevor Grant \email rawkintrevo@apache.org\\
+  \addr IBM, Chicago, US\\
+  %
   \name Shannon Quinn \email squinn@apache.org\\
+  \addr Department of Computer Science, University of Georgia\\
+  \addr Athens, US\\ 
+  %
   \name Paritosh Ranjan \email pranjan@apache.org\\
+  %
   \name Sebastian Schelter \email ssc@apache.org\\
+  \addr Center for Data Science, New York University\\
+  \addr New York, US\\
+  %
+  \name Özgür Yılmazel \email oyilmazel@apache.org\\
+  \addr Anadolu University\\
+  \addr Tepebaşı / Eskişehir, Turkey\\
 }
 
 \editor{}
 
 \maketitle
 
-\begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
-Apache Mahout is a library for scalable machine learning (ML) on distributed dataflow systems, offering various implementations of classification, clustering, dimensionality reduction and recommendation algorithms. It originated in 2008 and targeted MapReduce, which was the predominant abstraction for scalable computing in industry at that time. It has since then migrated to a general framework for linear algebraic computations on dataflow backends such as Apache Spark, Apache Flink and H20. Mahout is maintained as a community-driven, top-level, open source project at the Apache Software Foundation. 
+\begin{abstract}%  
+\textsc{Apache Mahout} is a library for scalable machine learning (ML) on distributed dataflow systems, offering various implementations of classification, clustering, dimensionality reduction and recommendation algorithms. It originated in 2008 and targeted MapReduce, which was the predominant abstraction for scalable computing in industry at that time. Mahout has been widely used in industry and commercial cloud offerings. In recent years, Mahout migrated to a general framework enabling a mix of dataflow programming and linear algebraic computations on backends such as \textsc{Apache Spark}, \textsc{Apache Flink} and \textsc{H20}. Mahout is maintained as a community-driven, top-level, open source project at the Apache Software Foundation, and is available under \url{https://mahout.apache.org}. 
 \end{abstract}
 
-%\begin{keywords}
-%  Bayesian Networks, Mixture Models, Chow-Liu Trees
-%\end{keywords}
 
 \section{Introduction}
 
-\textit{Mahout} was started in 2008 as a subproject of the open source search engine \textit{Apache Lucence}~(\cite{Owen2012,Mccandless2010}), whose community encountered a growing need for applying ML techniques on large text corpora. In 2010, Mahout became a top-level Apache project. A critical component of modern large-scale machine learning (ML) is operating on, accessing, and analyzing datasets stored in distributed filesystems running on a cluster of machines. In such an environment, data analysis is often conducted using distributed dataflow engines, that allow for scalable, data-parallel execution of programs.
+\textsc{Mahout} was started in 2008 as a subproject of the open source search engine Apache Lucene~(\cite{Owen2012,Mccandless2010}), when the information retrieval community encountered a growing need for applying ML techniques on large text corpora. In 2010, Mahout became a top-level Apache project. At the time when Mahout emerged, the dominant platform for storing and processing large datasets has been the Hadoop ecosystem, where data was stored based on an open source implementation of the Google filesystem~(\cite{Ghemawat2003}) and processed using the MapReduce paradigm~(\cite{Dean2008}), which was initially developed for building the search index of webscale search engines. Due to the prevalence of Hadoop in industry and research which indicated that a large family of popular ML algorithms can be reformulated under the MapReduce paradigm~(\cite{Chu2007}), Mahout initially focused on MapReduce-based algorithm implementations. Mahout has been widely used industry, including by leading web companies\footnote{\url{https://mahout.apache.org/general/powered-by-mahout.html}} such as Twitter, Linkedin and Foursquare, and is available in major commercial cloud offerings such as Amazon's \textit{Elastic MapReduce} service\footnote{\url{https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-mahout.html}} and Microsoft's \textit{Azure HDInsight}\footnote{\url{https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-component-versioning}}.
+
+While data is still stored in the Hadoop filesystem in many industry deployments, the actual platforms and paradigms to process this data have changed tremendously, mainly due to performance and usability problems with MapReduce. Current paradigms and systems range from analytical databases, to general dataflow engines to specialized machine learning systems. Therefore, Mahout has evolved to leverage a domain-specific language (DSL) called Samsara for newer algorithm implementations, which can be executed on a variety of different platforms. In the remainder of this paper, we will first introduce Mahout's `legacy' algorithms implemented on MapReduce~(Section\ref{sec:legacy}), and afterwards describe the Samsara language in Section~\ref{sec:samsara}.
 
 \section{Legacy: MapReduce-based Algorithms}
-\todo{Clarify: Not many choices for ML in Hadoop ecosystem, quick introduction to MapReduce, (\cite{Chu2007}) showed that a large family of popular ML algorithms can be reformulated under the MapReduce paradigm}
+\label{sec:legacy}
 
-Classification MR implementation of~\cite{Rennie2003}
+\textit{Collaborative Filtering}. Mahout features a huge variety of collaborative filtering algorithms for recommendation scenarios. A simple, well-working and widely deployed nearest-neighbor-based approach here is item-based collaborative filtering~\cite{Sarwar2001}, where a matrix of similarities between the interaction behavior of all item pairs is computed, and leveraged to derive recommendations later on. Mahout features various implementation of this approach, both distributed and non-distributed~(\cite{,Dunning1993,Schelter2012,Dunning2014}). Another popular technique to analyze interactions between two types of entities are so-called latent factor models. They factor the sparse partially-observed user-item interaction matrix $M$ into the product of two low-rank matrices, such that their that their product approximates the observed parts of the interaction matrix and generalizes well to unobserved parts of the same. Analogous to the neighborhood-based methods, Mahout provides distributed and non-distributed implementations of latent factor models as well. It contains SGD-based learners (including Hogwild!-style parallelization~\cite{Bennett2007,Recht2011}), as well as different variants of alternating-least-squares-based approaches~\cite{Schelter2013,Zhou2008,Hu2008}.\\
 
-Clustering MR implementation of canopy clustering~\cite{Mccallum2000}
+\textit{Classification}. Mahout contains a MapReduce implementation of Naive Bayes with special preprocessing steps for textual data as described in~\cite{Rennie2003}. Naive Bayes fits the MR paradigm particularly well as it only requires a fixed number of passes over the data, which compute aggregates and are easy to parallelize. Additionally, Mahout features a single machine implementation of Logistic Regression learned with Stochastic Gradient Descent~(SGD), which allows its users to train models in an incremental fashion. The SGD framework includes an online evaluation component using cross-validation, which runs several learners in separate threads with different hyperparameter settings. This implementation includes a library which allows users to easily encode different types features. Furthermore, Mahout contains a MapReduce-based implementation of Random Forests~(\cite{Breiman2001}) and a single-machine implementation for learning Hidden Markov Models.\\
 
-Collaborative Filtering
+\textit{Clustering}. Mahout includes MapReduce-based implementations of $k$-Means clustering and canopy clustering~(\cite{Mccallum2000}). $k$-means is easy to parallelize as the distance computation between centroids and data points is embarassingly parallel and the re-computation of the centroids can be executed using a single distributed aggregation. Additionally, Mahout includes a streaming version of $k$-Means. This approach first conducts a streaming pass through the data and produces a large number of temporary centroids, after which a `ball $k$-Means' step~(\cite{Shindler2011,Ostrovsky2012}) will further reduce the number of clusters down to $k$.\\
 
-SVD Lanczos + Stochastic SVD~\cite{Halko2012}
+\textit{Dimensionality Reduction}. Mahout contains implementations of two algorithms to compute the singular value decomposition (SVD) of large matrices: MapReduce-based versions of the Lanczos algorithm~(\cite{Golub2012}), which conducts a series of distributed matrix vector multiplications, and of Stochastic SVD~(\cite{Halko2012}) which only requires a fixed number of passes over the data. Furthermore, Mahout features MapReduce-based implementations for computing embeddings of textual data such as Latent Semantic Analysis~(\cite{Deerwester1990}) and Latent Dirichlet Allocation~(\cite{Blei2003}).
 
-item-based collaborative filtering~(\cite{Sarwar2001}) \cite{Dunning1993,Schelter2012,Dunning2014},
-ALS~\cite{Schelter2013} todo add original paper~\cite{Zhou2008}\\
+
 
 \section{Mahout Samsara}
+\label{sec:samsara}
 
-\todo{Intro, rewrite} Examples of such systems include Apache~Spark~(\cite{Zaharia2012}), Apache~Flink~(\cite{Alexandrov2014}) and H2o~(\cite{H2O}). Unfortunately, these systems are difficult to program, as their programming model is heavily influenced by the underlying data-parallel execution scheme. Usually, programs consist of a sequence of parallelizable second-order functions (such as \texttt{map}, \texttt{reduce} or \texttt{groupBy}) that dictate how the system should execute user-defined first-order functions on partitioned data~\cite{Zaharia2012}. Such programming models are non-intuitive for users without a background in distributed systems, and are in general hard to program without a detailed understanding of the underlying execution model. Furthermore, the available programming abstractions typically rely on partitioned, unordered sets; this is a mismatch for ML applications that mostly operate on linear algebra constructs (e.g.,~vectors and matrices). Therefore, implementing ML algorithms on dataflow systems is a tedious and difficult task. Mahout rebuilt itself on top of \emph{Samsara}~(\cite{Lyubimov2016}), a domain-specific language for declarative machine learning in cluster environments. Samsara allows its users to specify programs using a set of common matrix abstractions and linear algebraic operations, similar to R or MATLAB. Samsara then compiles, optimizes and executes these programs on distributed dataflow systems~(\cite{Schelter2016}). The aim of Samsara is to allow mathematicians and data scientists to leverage the scalability of distributed dataflow systems via common declarative abstractions, while drastically reducing the need for detailed knowledge of the programming model and execution scheme of the underlying systems. Samsara is part of the Apache Mahout library and supports backends like Apache Spark and Apache Flink. \todo{2 sentences for the optimization techniques}\\ 
+As already mentioned in the introduction, it became clear over time that the MapReduce paradigm is suboptimal for the distributed execution of ML algorithms, both for reasons of usability and performance. At the same time, the underlying Hadoop platform has been rewritten to expose resource management and job scheduling capabilities\footnote{\url{https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html}} to allow systems with parallel processing paradigms different from MapReduce to operate on data stored in the distributed filesystem. Examples of such systems are Apache~Spark~(\cite{Zaharia2012}), Apache~Flink~(\cite{Alexandrov2014}) and H2o~(\cite{H2O}). 
+
+Unfortunately, these systems are still difficult to program, as their programming model is heavily influenced by the underlying data-parallel execution scheme. Usually, programs consist of a sequence of parallelizable second-order functions (such as \texttt{map}, \texttt{reduce} or \texttt{groupBy}) that dictate how the system should execute user-defined first-order functions on partitioned data. Such programming models are non-intuitive for users without a background in distributed systems, and are in general hard to program without a detailed understanding of the underlying execution model. Furthermore, the available programming abstractions typically rely on partitioned, unordered sets; this is a mismatch for ML applications that mostly operate on matrices and vectors. Therefore, implementing ML algorithms on dataflow systems is a tedious and difficult task. 
+
+As a consequence, Mahout has been rebuilt on top of \textsc{Samsara}~(\cite{Lyubimov2016}), a domain-specific language for declarative machine learning in cluster environments. Samsara allows its users to specify programs using a set of common matrix abstractions and linear algebraic operations, similar to \textsc{R} or \textsc{MATLAB}. Samsara then compiles, optimizes and executes these programs on distributed dataflow systems~(\cite{Schelter2016}). The aim of Samsara is to allow mathematicians and data scientists to leverage the scalability of distributed dataflow systems via common declarative abstractions, while drastically reducing the need for detailed knowledge of the programming model and execution scheme of the underlying systems.
 %
 \begin{wrapfigure}{r}{0.4\textwidth}
   \begin{center}
     \includegraphics[scale=0.33]{figures/architecture-crop}
-    \caption{Architecture.\label{fig:architecture}}
+    \caption{Samsara architecture.\label{fig:architecture}}
   \end{center}
 \end{wrapfigure}
 %
-\noindent\textbf{Architecture and Execution}. Figure~\ref{fig:architecture} illustrates the architecture of Samsara. Applications are written using the Scala DSL. The in-memory operations are immediately executed, while operations on DRMs are deferred. The system records the actions to perform on these distributed matrices, and internally builds a directed acyclic graph (DAG) of logical operations from them, where vertices refer to matrices and edges correspond to transformations between them. Materialization barriers (e.g., persisting a result or collecting a matrix into local memory) implicitly trigger execution. Upon execution, the DAG of logical operators is optimized and transformed into a DAG of physical operators to execute. These physical operators are specific to one of the backends that Samsara supports (currently Apache~Spark and Apache~Flink), and run the distributed parts of the program using the respective backend. \todo{explain example in 3-4 sentences}
 
-\begin{lstlisting}[numbers=left,numberstyle={\tiny},caption={Distributed Ridge Regression for tall \& skinny matrices using Samsara.},captionpos=b,label={lst:linearRegr}]
-def dridge(data: DrmLike[Int], lambda: Double): Matrix {
-  // slice out features, add column for bias term
-  val drmX = data(::, 0 until data.ncol) cbind 1
-  val drmY = data(::, data.ncol) // slice out target
-
-  val drmXtX = drmX.t %*% drmX //distributed matrix
-  val drmXtY = drmX.t %*% drmY // multiplications
-
-  val XtX = drmXtX.collect // materialization of results
-  val XtY = drmXty.collect // in driver memory
-
-  XtX.diagv += lambda // add regularization
-  solve(XtX, XtY) // compute parameters in-core on driver
-}
-\end{lstlisting}
-
-\todo{Details on backends, e.g., Flink-backend~(\cite{Alexandrov2014}) has problems with control-flow}
+Figure~\ref{fig:architecture} illustrates the architecture of Samsara. Applications are written using the Scala DSL, and developers have to choose between an in-memory and a distributed representation of matrices used in the program. Operations on in-memory matrices are immediately executed, while operations on distributed matrices (which are partitioned among the machines in the cluster) are deferred. The system records the actions to perform on these distributed matrices, and internally builds a directed acyclic graph (DAG) of logical operations from them, where vertices refer to matrices and edges correspond to transformations between them. Materialization barriers (e.g., persisting a result or collecting a matrix into local memory) implicitly trigger execution. Upon execution, the DAG of logical operators is optimized, e.g., by removing redundant transpose operations and by choosing execution strategies for matrix multiplications based on the shape of the operands. The program is then transformed into a DAG of physical operators to execute, which are specific to one of the backends that Samsara supports (currently Apache~Spark, Apache~Flink and H20), and its distributed parts are executed by the respective backend. A current effort is to support the native execution of costly matrix operations on GPUs via an integration of the ViennaCL~(\cite{Rupp2010}) framework.
 
 \section{Availability and Requirements}
 
-Mahout is run as a top-level project under the umbrella of the Apache Software Foundation, and developed in a community-driven, meritocratic fashion according to the \textit{Apache Way}\footnote{\url{https://www.apache.org/foundation/how-it-works.html}}. Mahout is available under an Apache License at \url{https://mahout.apache.org}. Mahout requires at least Java 7 and Scala 2.10 for Samsara. The legacy algorithms require Hadoop 2.4, while Samsara compiles to to Flink 1.1, Spark 1.6/2.x and H20 0.1.25.
+Mahout is run as a top-level project under the umbrella of the Apache Software Foundation, and developed in a community-driven, meritocratic fashion according to the \textit{Apache~Way}\footnote{\url{https://www.apache.org/foundation/how-it-works.html}}. Mahout is available under the Apache License at \url{https://mahout.apache.org}. The latest version v0.13.0 requires at least Java~7 and Scala~2.10 for Samsara. The legacy algorithms require Hadoop~2.4, while Samsara programs can be executed on Flink~1.1, Spark~1.6/2.x and H20~0.1.25.
 
-\section{Outlook}
+\newpage
+\acks{}
+Over the years, Mahout has been the product of the efforts of numerous people. The authors of this paper we would like to thank: Abdelhakim Deneche, Anand Avati, Andrew Musselman, Benson Margulies, Dan Filimon, David Hall, Dawid Weiss, Dmitriy Lyubimov, Drew Farris, Ellen Friedman, Erik Hatcher, Frank Scholten, Grant Ingersoll, Jake Mannix, Jeff Eastman, Karl Wettin, Niranjan Balasubramanian, Otis Gospodnetic, Pat Ferrel, Sean Owen, Stevo Slavić, Suneel Marthi, Ted Dunning and Tom Pierce. Of course we extend our thanks to all users and contributors as well.
 
-linear + relational algebra, df systems one extreme, dl systems other, middleground must be found
-
-\section{Acknowledgements}
-\todo{list anyone here who chose not to be a co-author} Mahout is the product of the efforts of numerous people. We would like to thank all the project's committers who did not co-author this paper: Abdelhakim Deneche, Anand Avati, Andrew Musselman, Benson Margulies, Dan Filimon, David Hall, Dawid Weiss, Dmitriy Lyubimov, Drew Farris, Ellen Friedman, Erik Hatcher, Frank Scholten, Grant Ingersoll, Jake Mannix, Jeff Eastman, Karl Wettin, Niranjan Balasubramanian, Otis Gospodnetic, Ozgur Yilmazel, Pat Ferrel,  Sean Owen, Stevo Slavić, Suneel Marthi, Ted Dunning, Tom Pierce. Of course we extend our thanks tos all users and contributors as well.
-
-\vskip 0.2in
+%\vskip 0.2in
 \bibliography{mahout}
 
 \end{document}
