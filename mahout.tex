@@ -65,6 +65,7 @@
   \addr Athens, US\\ 
   %
   \name Paritosh Ranjan \email pranjan@apache.org\\
+  \addr IBM, Kolkata, IN\\
   %
   \name Sebastian Schelter \email ssc@apache.org\\
   \addr Center for Data Science, New York University\\
@@ -99,7 +100,7 @@ While data is still stored in the Hadoop filesystem in many industry deployments
 
 \textit{Clustering}. Mahout includes MapReduce-based implementations of $k$-Means clustering and canopy clustering~(\cite{Mccallum2000}). $k$-means is easy to parallelize as the distance computation between centroids and data points is embarassingly parallel, and the re-computation of the centroids can be executed using a single distributed aggregation. Additionally, Mahout includes a streaming version of $k$-Means. This approach first conducts a streaming pass through the data and produces a large number of temporary centroids, after which a `ball $k$-Means' step~(\cite{Shindler2011,Ostrovsky2012}) will further reduce the number of clusters down to $k$.\\
 
-\textit{Dimensionality Reduction}. Mahout contains implementations of two algorithms to compute the singular value decomposition (SVD) of large matrices: MapReduce-based versions of the Lanczos algorithm~(\cite{Golub2012}), which conducts a series of distributed matrix vector multiplications, and of Stochastic SVD~(\cite{Halko2012}) which only requires a fixed number of passes over the data. Furthermore, Mahout features MapReduce-based implementations for computing embeddings of textual data such as Latent Semantic Analysis~(\cite{Deerwester1990}) and Latent Dirichlet Allocation~(\cite{Blei2003}).
+\textit{Dimensionality Reduction}. Mahout contains implementations of two algorithms to compute the singular value decomposition (SVD) of large matrices: MapReduce-based versions of the Lanczos algorithm~(\cite{Golub2012}), which conducts a series of distributed matrix vector multiplications, and of Stochastic SVD~(\cite{Halko2012}) which only requires a fixed number of passes over the data. Furthermore, Mahout features MapReduce-based implementations for computing embeddings of textual data such as Latent Semantic Analysis~(\cite{Deerwester1990}) and Latent Dirichlet Allocation~(\cite{Blei2003}), a powerful learning algorithm for automatically and jointly clustering words into topics and documents into mixtures of topics.
 
 
 
